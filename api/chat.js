@@ -13,10 +13,15 @@ export default async function handler(req, res) {
         "anthropic-version": "2023-06-01"
       },
       body: JSON.stringify({
-       model: "claude-3-sonnet-20240307"
+        model: "claude-3-haiku-20240307",
         max_tokens: 200,
         messages: [
-          { role: "user", content: userMessage }
+          {
+            role: "user",
+            content: [
+              { type: "text", text: userMessage }
+            ]
+          }
         ]
       })
     });
