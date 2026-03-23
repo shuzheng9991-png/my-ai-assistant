@@ -13,13 +13,16 @@ export default async function handler(req, res) {
         "anthropic-version": "2023-06-01"
       },
       body: JSON.stringify({
-        model: "claude-3-sonnet-20240229"
+        model: "claude-3-5-sonnet-20241022",
         max_tokens: 200,
         messages: [
           {
             role: "user",
             content: [
-              { type: "text", text: userMessage }
+              {
+                type: "text",
+                text: userMessage
+              }
             ]
           }
         ]
@@ -28,11 +31,18 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    res.status(200).json({
-      reply: data.content?.[0]?.text || JSON.stringify(data)
-    });
+    // 👇 关键修复（防止 undefined 崩溃）
+    const reply =
+      data?.content?.[0]?.text ||
+      data?.error?.message ||
+      "No response";
+
+    res.status(200).json({ reply });
 
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      error: error.message,
+      stack: error.stack
+    });
   }
 }
