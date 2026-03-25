@@ -1,16 +1,13 @@
 export default async function handler(req, res) {
-  try {
-    const userMessage =
-      req.method === "POST"
-        ? req.body?.message
-        : req.query?.message || "Hello";
+  const userMessage = req.query.message || "Hello";
 
+  try {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json，
         "x-api-key": process.env.ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01"
+        "anthropic-version": "2023-06-01",
+        "content-type": "application/json"
       },
       body: JSON.stringify({
         model: "claude-3-5-sonnet-20240620",
@@ -31,18 +28,13 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    // 👇 关键修复（防止 undefined 崩溃）
-    const reply =
-      data?.content?.[0]?.text ||
-      data?.error?.message ||
-      "No response";
-
-    res.status(200).json({ reply });
+    res.status(200).json({
+      reply: data.content?.[0]?.text || JSON.stringify(data)
+    });
 
   } catch (error) {
     res.status(500).json({
-      error: error.message,
-      stack: error.stack
+      error: error.message
     });
   }
 }
